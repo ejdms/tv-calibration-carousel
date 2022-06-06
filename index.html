@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: sans-serif;
+			}
+
+			[data-role='root'] {
+				background-color: black;
+			}
+
+			[data-role='img-wrapper'] {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+				max-width: 100%;
+				height: 100vh;
+				max-height: 100vh;
+			}
+
+			[data-role='image'] {
+				width: auto;
+				max-width: 100%;
+				height: auto;
+				max-height: 100vh;
+			}
+
+			[data-role='controls'] {
+				position: absolute;
+				bottom: 20px;
+				left: 50%;
+				padding: 20px 0;
+				transform: translateX(-50%);
+				background-color: rgba(255, 255, 255, 0.2);
+				border-radius: 10px;
+				border: 1px solid rgba(255, 255, 255, 0.9);
+				opacity: 0.1;
+				transition: opacity 0.15s;
+			}
+
+			[data-role='controls']:hover {
+				opacity: 1;
+			}
+
+			[data-role^='controls-'] {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			[data-role^='controls-'] > * {
+				color: rgba(255, 255, 255, 0.9);
+				text-shadow: 0px 0px 5px rgba(0, 0, 0, 1),
+					0px 0px 10px rgba(0, 0, 0, 0.7);
+				cursor: pointer;
+				text-align: center;
+			}
+
+			[data-role='controls-bottom'] {
+				margin-top: 10px;
+			}
+
+			[data-role='controls-top'] > div {
+				padding: 15px 30px;
+			}
+
+			[data-role='controls-top'] > div + div {
+				border-left: 1px solid rgba(255, 255, 255, 0.9);
+			}
+
+			[data-role='no-reset-checkbox-label'] {
+				display: flex;
+				align-items: center;
+				font-size: 0.7rem;
+				margin-top: 0.4rem;
+			}
+
+			[data-role='no-reset-checkbox-label'] > input[type='checkbox'] {
+				margin-right: 5px;
+			}
+
+			[data-role='image-info'] {
+				position: absolute;
+				left: 20px;
+				top: 20px;
+				color: rgba(255, 255, 255, 0.9);
+				text-shadow: 0px 0px 5px rgba(0, 0, 0, 1),
+					0px 0px 10px rgba(0, 0, 0, 0.7);
+				font-size: 0.8rem;
+			}
+
+			[data-role='incorrect-info'] {
+				position: absolute;
+				right: 20px;
+				top: 20px;
+				color: rgba(255, 255, 255, 0.9);
+				text-shadow: 0px 0px 5px rgba(0, 0, 0, 1),
+					0px 0px 10px rgba(0, 0, 0, 0.7);
+				font-size: 0.8rem;
+			}
+
+			[data-hidden='true'] {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div data-role="root">
+			<div data-role="image-info">
+				This is <span data-role="image-info-number">1</span> image
+			</div>
+			<div data-role="incorrect-info" data-hidden="true">
+				This image is incorrectly calibrated
+			</div>
+			<div data-role="img-wrapper" data-count="7"></div>
+			<div data-role="controls">
+				<div data-role="controls-top">
+					<div data-role="control-left">left</div>
+					<div data-role="change-mode">Mode change</div>
+					<div data-role="control-right">right</div>
+				</div>
+				<div data-role="controls-bottom">
+					<label data-role="no-reset-checkbox-label"
+						><input data-role="no-reset-checkbox" type="checkbox" />Don't reset
+						incorrect preview</label
+					>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		const s = (role) => document.querySelector(`[data-role="${role}"]`)
+		const sa = (role) => document.querySelectorAll(`[data-role="${role}"]`)
+
+		const root = s('root')
+		const iw = s('img-wrapper')
+		const cl = s('control-left')
+		const cr = s('control-right')
+		const cm = s('change-mode')
+		const nrc = s('no-reset-checkbox')
+		const ii = s('incorrect-info')
+		const iin = s('image-info-number')
+		const dc = parseInt(iw.dataset.count)
+
+		let currentImageIndex = 0
+		let isCurrentImageIncorrect = false
+
+		const addImg = (index, isIncorrect) => {
+			const i = document.createElement('img')
+			i.src = `./img/${index + 1}${isIncorrect ? 'i' : ''}.jpg`
+			i.dataset.role = 'image'
+			i.dataset.index = index
+			i.dataset.incorrect = isIncorrect
+			i.dataset.hidden = isIncorrect || !!index
+			iw.appendChild(i)
+		}
+
+		for (let i = 0; i < dc; i++) {
+			addImg(i, false)
+			addImg(i, true)
+		}
+
+		const onIsCurrenctImageIncorrectChange = (isIncorrect) => {
+			ii.dataset.hidden = !isIncorrect
+		}
+
+		const onSlideChange = (imageIndex) => {
+			sa('image').forEach((img) => {
+				img.dataset.hidden =
+					parseInt(img.dataset.index) !== imageIndex ||
+					img.dataset.incorrect === String(!nrc.checked)
+			})
+			if (!nrc.checked) {
+				isCurrentImageIncorrect = false
+				onIsCurrenctImageIncorrectChange(isCurrentImageIncorrect)
+			}
+			iin.textContent = imageIndex + 1
+		}
+
+		const changeSlide = (dir) => {
+			if (dir === 'left') {
+				if (currentImageIndex === 0) {
+					currentImageIndex = dc - 1
+				} else {
+					currentImageIndex--
+				}
+				onSlideChange(currentImageIndex)
+			}
+
+			if (dir === 'right') {
+				if (currentImageIndex === dc - 1) {
+					currentImageIndex = 0
+				} else {
+					currentImageIndex++
+				}
+
+				onSlideChange(currentImageIndex)
+			}
+		}
+
+		const changeMode = (isIncorrect) => {
+			isCurrentImageIncorrect = isIncorrect
+			onIsCurrenctImageIncorrectChange(isCurrentImageIncorrect)
+			const currentImageName = `${currentImageIndex + 1}${
+				isIncorrect ? 'i' : ''
+			}.jpg`
+			sa('image').forEach((img) => {
+				img.dataset.hidden = !img.src.includes(currentImageName)
+			})
+		}
+
+		const toggleMode = () => {
+			changeMode(!isCurrentImageIncorrect)
+		}
+
+		cl.addEventListener('click', () => changeSlide('left'))
+		cr.addEventListener('click', () => changeSlide('right'))
+		cm.addEventListener('click', toggleMode)
+	</script>
+</html>
