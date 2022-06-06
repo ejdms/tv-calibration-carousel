@@ -108,6 +108,18 @@
 				font-size: 0.8rem;
 			}
 
+			[data-role='keyboard-info'] {
+				padding: 15px;
+				margin-top: 20px;
+				background-color: rgba(255, 255, 255, 0.2);
+				border-radius: 10px;
+				border: 1px solid rgba(255, 255, 255, 0.9);
+				color: rgba(255, 255, 255, 0.9);
+				text-shadow: 0px 0px 5px rgba(0, 0, 0, 1),
+					0px 0px 10px rgba(0, 0, 0, 0.7);
+				cursor: pointer;
+			}
+
 			[data-hidden='true'] {
 				display: none;
 			}
@@ -117,6 +129,10 @@
 		<div data-role="root">
 			<div data-role="image-info">
 				This is <span data-role="image-info-number">1</span> image
+				<div data-role="keyboard-info">
+					Use left and right arrows to change image<br />
+					Use space to toggle mode
+				</div>
 			</div>
 			<div data-role="incorrect-info" data-hidden="true">
 				This image is incorrectly calibrated
@@ -149,6 +165,7 @@
 		const nrc = s('no-reset-checkbox')
 		const ii = s('incorrect-info')
 		const iin = s('image-info-number')
+		const ki = s('keyboard-info')
 		const dc = parseInt(iw.dataset.count)
 
 		let currentImageIndex = 0
@@ -222,8 +239,33 @@
 			changeMode(!isCurrentImageIncorrect)
 		}
 
+		const onKeyDown = (e) => {
+			const { key } = e
+			const functionMap = {
+				['ArrowLeft']: () => {
+					changeSlide('left')
+				},
+				['ArrowRight']: () => {
+					changeSlide('right')
+				},
+				[' ']: () => {
+					toggleMode()
+				},
+			}
+			if (Array.from(Object.keys(functionMap)).includes(key)) {
+				e.preventDefault()
+				functionMap[key]()
+			}
+		}
+
+		const onKeyboardInfoClick = () => {
+			ki.dataset.hidden = true
+		}
+
 		cl.addEventListener('click', () => changeSlide('left'))
 		cr.addEventListener('click', () => changeSlide('right'))
 		cm.addEventListener('click', toggleMode)
+		ki.addEventListener('click', onKeyboardInfoClick)
+		document.addEventListener('keydown', onKeyDown)
 	</script>
 </html>
