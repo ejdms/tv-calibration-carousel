@@ -77,17 +77,6 @@
 				border-left: 1px solid rgba(255, 255, 255, 0.9);
 			}
 
-			[data-role='no-reset-checkbox-label'] {
-				display: flex;
-				align-items: center;
-				font-size: 0.7rem;
-				margin-top: 0.4rem;
-			}
-
-			[data-role='no-reset-checkbox-label'] > input[type='checkbox'] {
-				margin-right: 5px;
-			}
-
 			[data-role='image-info'] {
 				position: absolute;
 				left: 20px;
@@ -144,12 +133,6 @@
 					<div data-role="change-mode">Mode change</div>
 					<div data-role="control-right">right</div>
 				</div>
-				<div data-role="controls-bottom">
-					<label data-role="no-reset-checkbox-label"
-						><input data-role="no-reset-checkbox" type="checkbox" />Don't reset
-						incorrect preview</label
-					>
-				</div>
 			</div>
 		</div>
 	</body>
@@ -162,7 +145,6 @@
 		const cl = s('control-left')
 		const cr = s('control-right')
 		const cm = s('change-mode')
-		const nrc = s('no-reset-checkbox')
 		const ii = s('incorrect-info')
 		const iin = s('image-info-number')
 		const ki = s('keyboard-info')
@@ -192,14 +174,14 @@
 
 		const onSlideChange = (imageIndex) => {
 			sa('image').forEach((img) => {
-				img.dataset.hidden =
-					parseInt(img.dataset.index) !== imageIndex ||
-					img.dataset.incorrect === String(!nrc.checked)
+				const isIndex = parseInt(img.dataset.index) === imageIndex
+				const isCorrect = img.dataset.incorrect === 'false'
+				const shouldBeShown = isIndex && isCorrect
+				img.dataset.hidden = !shouldBeShown
 			})
-			if (!nrc.checked) {
-				isCurrentImageIncorrect = false
-				onIsCurrenctImageIncorrectChange(isCurrentImageIncorrect)
-			}
+
+			isCurrentImageIncorrect = false
+			onIsCurrenctImageIncorrectChange(isCurrentImageIncorrect)
 			iin.textContent = imageIndex + 1
 		}
 
